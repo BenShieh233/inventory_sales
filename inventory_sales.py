@@ -3,6 +3,8 @@ import pandas as pd
 import re
 import plotly.express as px
 
+st.set_page_config(layout="wide")
+
 st.title("库存和销量数据交互式分析")
 
 ##############################
