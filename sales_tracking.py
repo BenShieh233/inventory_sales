@@ -105,7 +105,26 @@ if sales_file is not None:
 
         # 按Vendor SKU和平台进行聚合
         sku_sales = filtered_df.groupby(['Vendor SKU', 'Merchant'], as_index=False)['Sales Amount(销量)'].sum()
+
+        # 侧边栏筛选条件：指定销量的最小值和最大值
+        min_sales = st.sidebar.number_input("最低销量", min_value=0.0, value=None, step=0.01, format="%.2f")
+        max_sales = st.sidebar.number_input("最高销量", min_value=0.0, value=None, step=0.01, format="%.2f")
+
+        # 如果设置了销量范围，则过滤数据
+        if min_sales is not None or max_sales is not None:
+            if min_sales is not None and max_sales is not None:
+                sku_sales = sku_sales[(sku_sales['Sales Amount(销量)'] >= min_sales) & (sku_sales['Sales Amount(销量)'] <= max_sales)]
+            elif min_sales is not None:
+                sku_sales = sku_sales[sku_sales['Sales Amount(销量)'] >= min_sales]
+            elif max_sales is not None:
+                sku_sales = sku_sales[sku_sales['Sales Amount(销量)'] <= max_sales]
+            
         sku_sales_sorted = sku_sales.sort_values(by='Sales Amount(销量)', ascending=False)
+
+        # 如果没有符合条件的数据，显示提示信息
+        if sku_sales_sorted.empty:
+            st.write("没有符合条件的 SKU 数据。")
+
         # 拉条筛选排名范围
         total_skus = len(sku_sales_sorted)
         st.sidebar.subheader("功能模块二：Vendor SKU 销量排名筛选条件")
