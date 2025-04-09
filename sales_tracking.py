@@ -102,7 +102,7 @@ if sales_file is not None:
     #################################################
     with st.expander("功能模块二：SKU销量排序"):
         st.header("SKU销量排序")
-        
+
         st.sidebar.subheader("功能模块二：Vendor SKU 销量排名筛选条件")
         # 按Vendor SKU和平台进行聚合
         sku_sales = filtered_df.groupby(['Vendor SKU', 'Merchant'], as_index=False)['Sales Amount(销量)'].sum()
@@ -130,6 +130,9 @@ if sales_file is not None:
         total_skus = len(sku_sales_sorted)
 
         # 检查 session_state 中是否已经有值，如果没有就初始化
+        if st.session_state.m > total_skus:
+            m = total_skus
+            st.session_state.m = m  # 更新 session_state 中的 m 值
         if 'n' not in st.session_state:
             st.session_state.n = 1  # 默认起始排名
         if 'm' not in st.session_state:
