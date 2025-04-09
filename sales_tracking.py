@@ -186,7 +186,12 @@ if sales_file is not None:
         if sku_start_date and sku_end_date:
             mask_sku = (sku_df['Order Date'] >= pd.to_datetime(sku_start_date)) & (sku_df['Order Date'] <= pd.to_datetime(sku_end_date))
             sku_filtered_df = sku_df.loc[mask_sku]
-            
+
+            total_sales = sku_filtered_df['Sales Amount(销量)'].sum()
+    
+            # 显示 SKU 总销量
+            st.write(f"在 {sku_start_date} 到 {sku_end_date} 期间，SKU {selected_sku} 的总销量为: {total_sales}")
+    
             # 1) 按平台（Merchant）聚合：分别计算每个平台的销量
             sku_agg_platform = sku_filtered_df.groupby(['Order Date', 'Merchant'], as_index=False)['Sales Amount(销量)'].sum()
             
