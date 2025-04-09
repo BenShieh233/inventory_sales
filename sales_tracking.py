@@ -136,15 +136,18 @@ if sales_file is not None:
                 st.session_state.m = st.session_state.n  # 默认结束排名与起始排名相同
 
             # 更新 n 和 m
-            n = st.sidebar.number_input('起始排名n', min_value=1, max_value=total_skus, value=st.session_state.n)
+            n = st.sidebar.number_input('起始排名n', min_value=1, max_value=total_skus, value=st.session_state.n)            
+            if st.session_state.m > total_skus:
+                m = total_skus
+                st.session_state.m = m  # 更新 session_state 中的 m 值
             m = st.sidebar.number_input(f'结束排名m (上限为{total_skus})', min_value=n, max_value=total_skus, value=st.session_state.m)
 
             # 将输入值存入 session_state，以便保存状态
             st.session_state.n = n
             st.session_state.m = m
-            if st.session_state.m > total_skus:
-                m = total_skus
-                st.session_state.m = m  # 更新 session_state 中的 m 值
+
+
+
             # 获取排名n-m的Vendor SKU
             selected_skus = sku_sales_sorted.iloc[n-1:m].reset_index(drop=True)
             
