@@ -123,68 +123,70 @@ if sales_file is not None:
         sku_sales_sorted = sku_sales.sort_values(by='Sales Amount(销量)', ascending=False)
 
         # 如果没有符合条件的数据，显示提示信息
-        if sku_sales_sorted.empty:
-            st.write("没有符合条件的 SKU 数据。")
+        if not sku_sales_sorted.empty:
 
-        # 拉条筛选排名范围
-        total_skus = len(sku_sales_sorted)
+            # 拉条筛选排名范围
+            total_skus = len(sku_sales_sorted)
 
-        # 检查 session_state 中是否已经有值，如果没有就初始化
-        if st.session_state.m > total_skus:
-            m = total_skus
-            st.session_state.m = m  # 更新 session_state 中的 m 值
-        if 'n' not in st.session_state:
-            st.session_state.n = 1  # 默认起始排名
-        if 'm' not in st.session_state:
-            st.session_state.m = st.session_state.n  # 默认结束排名与起始排名相同
+            # 检查 session_state 中是否已经有值，如果没有就初始化
 
-        # 更新 n 和 m
-        n = st.sidebar.number_input('起始排名n', min_value=1, max_value=total_skus, value=st.session_state.n)
-        m = st.sidebar.number_input(f'结束排名m (上限为{total_skus})', min_value=n, max_value=total_skus, value=st.session_state.m)
+            if 'n' not in st.session_state:
+                st.session_state.n = 1  # 默认起始排名
+            if 'm' not in st.session_state:
+                st.session_state.m = st.session_state.n  # 默认结束排名与起始排名相同
 
-        # 将输入值存入 session_state，以便保存状态
-        st.session_state.n = n
-        st.session_state.m = m
-        # 获取排名n-m的Vendor SKU
-        selected_skus = sku_sales_sorted.iloc[n-1:m].reset_index(drop=True)
-        
-        # 显示选择的Vendor SKU
-        st.write(f"显示销量排名 {n}-{m} 的Vendor SKU (日期与 <span style='color:blue;'>功能模块一</span> 中的 时间范围 一致)", unsafe_allow_html=True)
-        st.dataframe(selected_skus)
-        group_sort = st.sidebar.checkbox("按总销量排序 Vendor SKU（不分平台）", value=True)
-        if group_sort:
-            # 绘制条形图
-            fig_bar = px.bar(
-                selected_skus,
-                x='Vendor SKU',
-                y='Sales Amount(销量)',
-                barmode='stack',
-                text='Sales Amount(销量)',
-                title=f"{start_date} ~ {end_date} 销量排名{n} - {m} SKU条形图",
-                category_orders={"Vendor SKU": selected_skus}  # ✅ 强制按这个顺序排序           
-            )
-            fig_bar.update_traces(texttemplate='%{text:.2f}', textposition='outside',                            
-                                hovertemplate='Vendor SKU: %{x}<br>销量: %{y:.2f}<extra></extra>'  # 悬停时显示两位小数
-                                )
-            fig_bar.update_layout(uniformtext_minsize=8, uniformtext_mode='hide', xaxis_title="Vendor SKU", yaxis_title="销量")
+            # 更新 n 和 m
+            n = st.sidebar.number_input('起始排名n', min_value=1, max_value=total_skus, value=st.session_state.n)
+            m = st.sidebar.number_input(f'结束排名m (上限为{total_skus})', min_value=n, max_value=total_skus, value=st.session_state.m)
 
-            st.plotly_chart(fig_bar, use_container_width=True)
-        else:
+            # 将输入值存入 session_state，以便保存状态
+            st.session_state.n = n
+            st.session_state.m = m
+            if st.session_state.m > total_skus:
+                m = total_skus
+                st.session_state.m = m  # 更新 session_state 中的 m 值
+            # 获取排名n-m的Vendor SKU
+            selected_skus = sku_sales_sorted.iloc[n-1:m].reset_index(drop=True)
             
-            fig_bar = px.bar(
-                selected_skus,
-                x='Vendor SKU',
-                y='Sales Amount(销量)',
-                color='Merchant',
-                barmode='stack',
-                text='Sales Amount(销量)',
-                title=f"{start_date} ~ {end_date} 销量排名{n} - {m} SKU条形图"
-            )
-            fig_bar.update_traces(texttemplate='%{text:.2f}', textposition='outside')
-            fig_bar.update_layout(uniformtext_minsize=8, uniformtext_mode='hide', xaxis_title="Vendor SKU", yaxis_title="销量")
+            # 显示选择的Vendor SKU
+            st.write(f"显示销量排名 {n}-{m} 的Vendor SKU (日期与 <span style='color:blue;'>功能模块一</span> 中的 时间范围 一致)", unsafe_allow_html=True)
+            st.dataframe(selected_skus)
+            group_sort = st.sidebar.checkbox("按总销量排序 Vendor SKU（不分平台）", value=True)
+            if group_sort:
+                # 绘制条形图
+                fig_bar = px.bar(
+                    selected_skus,
+                    x='Vendor SKU',
+                    y='Sales Amount(销量)',
+                    barmode='stack',
+                    text='Sales Amount(销量)',
+                    title=f"{start_date} ~ {end_date} 销量排名{n} - {m} SKU条形图",
+                    category_orders={"Vendor SKU": selected_skus}  # ✅ 强制按这个顺序排序           
+                )
+                fig_bar.update_traces(texttemplate='%{text:.2f}', textposition='outside',                            
+                                    hovertemplate='Vendor SKU: %{x}<br>销量: %{y:.2f}<extra></extra>'  # 悬停时显示两位小数
+                                    )
+                fig_bar.update_layout(uniformtext_minsize=8, uniformtext_mode='hide', xaxis_title="Vendor SKU", yaxis_title="销量")
 
-            st.plotly_chart(fig_bar, use_container_width=True)
+                st.plotly_chart(fig_bar, use_container_width=True)
+            else:
+                
+                fig_bar = px.bar(
+                    selected_skus,
+                    x='Vendor SKU',
+                    y='Sales Amount(销量)',
+                    color='Merchant',
+                    barmode='stack',
+                    text='Sales Amount(销量)',
+                    title=f"{start_date} ~ {end_date} 销量排名{n} - {m} SKU条形图"
+                )
+                fig_bar.update_traces(texttemplate='%{text:.2f}', textposition='outside')
+                fig_bar.update_layout(uniformtext_minsize=8, uniformtext_mode='hide', xaxis_title="Vendor SKU", yaxis_title="销量")
 
+                st.plotly_chart(fig_bar, use_container_width=True)
+    
+        else:
+            st.warning("您选择的范围已超出当前数据集最大/最小值，请重新设置过滤条件")
 
     #################################################
     # 3. SKU查询模块
